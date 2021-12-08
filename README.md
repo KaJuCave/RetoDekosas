@@ -24,14 +24,209 @@ Por último en el directorio **resources** se creara la clase con la extensión 
 
 _Nota: En las siguientes secciones se explicarán con más detalle la codificación de cada una de sus clases_ 
 
-* Adicionalmente se debe descargar el [chomedriver]( https://chromedriver.chromium.org/downloads) de acuerdo a la versión del navegador, este le permitira que implementa el protocolo de WebDriver para Chromium. Por último, se agrega este driver y el archivo de Excel (con el nombre de los productos) a los archivos del proyecto.
+* Adicionalmente se debe descargar el [chromedriver]( https://chromedriver.chromium.org/downloads) de acuerdo a la versión del navegador, este le permitira que implementa el protocolo de WebDriver para Chromium. Por último, se agrega este driver y el archivo de Excel (con el nombre de los productos) a los archivos del proyecto.
 
 ![driverExcel](https://github.com/KaJuCave/imagenesDekosas/blob/master/driversExcel.PNG)
 
 ## Codificación del proyecto
 
+En esta sesión se explicará detalladamente la codificación que se implementó para automatización de los productos de la página Dekosas.
 
+### Agregar dependencias
 
+Para que el correcto funcionamiento de algunas utilidades en el proyecto se debe agregar las dependencias en el archivo **build.gradle** que se muestran a continuación 
+
+```
+apply plugin: 'java-library'
+apply plugin: 'net.serenity-bdd.aggregator'
+apply plugin: 'eclipse'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+
+    }
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:2.0.80")
+    }
+}
+
+dependencies {
+    implementation 'net.serenity-bdd:serenity-junit:2.0.80'
+    implementation 'net.serenity-bdd:serenity-cucumber:1.9.45'
+    implementation 'net.serenity-bdd:serenity-core:2.0.80'
+    implementation 'org.slf4j:slf4j-simple:1.7.7'
+    implementation group: 'org.apache.poi', name: 'poi', version: '3.17'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '3.17'
+}
+
+test {
+    ignoreFailures = true
+}
+gradle.startParameter.continueOnFailure = true
+
+```
+### Archivo Excel
+
+```
+public class Excel {
+
+    public static <rutaDeExcel, hojaExcel> ArrayList<Map<String, String>> leerDatosDeHojaDeExcel( String rutaDeExcel, String hojaDeExcel) throws IOException {
+        ArrayList<Map<String, String>> arrayListDatoPlanTrabajo = new ArrayList<Map<String, String>>();
+        Map<String, String> informacionProyecto = new HashMap<String, String>();
+        File file = new File(rutaDeExcel);
+        FileInputStream inputStream = new FileInputStream(file);
+        XSSFWorkbook newWorkbook = new XSSFWorkbook(inputStream);
+        XSSFSheet newSheet = newWorkbook.getSheet(hojaDeExcel);
+        Iterator<Row> rowIterator = newSheet.iterator();
+        Row titulos = rowIterator.next();
+        while (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+            Iterator<Cell> cellIterator = row.cellIterator();
+            while (cellIterator.hasNext()) {
+                Cell cell = cellIterator.next();
+                cell.getColumnIndex();
+                switch (cell.getCellTypeEnum()) {
+                    case STRING:
+                        informacionProyecto.put(titulos.getCell(cell.getColumnIndex()).toString(), cell.getStringCellValue());
+                        break;
+                    case NUMERIC:
+                        informacionProyecto.put(titulos.getCell(cell.getColumnIndex()).toString(), String.valueOf((long) cell.getNumericCellValue()));
+                        break;
+                    case BLANK:
+                        informacionProyecto.put(titulos.getCell(cell.getColumnIndex()).toString(), "");
+                        break;
+                    default:
+                }
+            }
+            arrayListDatoPlanTrabajo.add(informacionProyecto);
+            informacionProyecto = new HashMap<String, String>();
+        }
+        return arrayListDatoPlanTrabajo;
+    }
+}
+```
+### Características ChromeDriver
+```
+public class GoogleChromeDriver {
+
+    public static WebDriver driver;
+
+    public static void chomeWebDriver(String url) {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--ignore-certificate-errors");
+        options.addArguments("--disable-infobars");
+        driver = new ChromeDriver(options);
+        driver.get(url);
+    }
+}
+
+```
+### Elementos y pasos en la página Dekosas
+
+```
+By txtBuscador = By.xpath("//input[@id='search' and @name='q']");
+By btnBuscador = By.xpath("//button[@class='amsearch-loupe' and @title='Buscar']");
+
+```
+```
+public void setBtnElementoBusqueda(String producto) {
+        this.btnElementoBusqueda = By.xpath("//a[contains(text(),'"+producto+"')]");
+    }
+**
+
+    public void setTxtElementoBusqueda(String producto) {
+        this.txtElementoBusqueda = By.xpath("//span[contains(text(),'"+producto+"')]");
+    }
+
+```
+**DekosasSteps**
+```
+DekosasPage dekosasPage = new DekosasPage();
+Excel excelarchivo= new Excel();
+ArrayList<Map<String, String>> datosExcel;
+
+```
+
+```
+public void abrirPagina(){
+        GoogleChromeDriver.chomeWebDriver("https://dekosas.com/co/");
+    }
+
+    public void leerProductosDekosasExcel() {
+        try {
+            datosExcel = Excel.leerDatosDeHojaDeExcel("retoDekosas.xlsx","Productos");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void validarElementoEnPantalla(){
+        for (int i = 0; i <= datosExcel.size()-1; i++) {
+            GoogleChromeDriver.driver.findElement(dekosasPage.getTxtBuscador()).sendKeys(datosExcel.get(i).get("Nombre Producto"));
+            GoogleChromeDriver.driver.findElement(dekosasPage.getTxtBuscador()).sendKeys(Keys.ENTER);
+            dekosasPage.setBtnElementoBusqueda(datosExcel.get(i).get("Nombre Producto"));
+            GoogleChromeDriver.driver.findElement(dekosasPage.getBtnElementoBusqueda()).click();
+            dekosasPage.setTxtElementoBusqueda(datosExcel.get(i).get("Nombre Producto"));
+            Assert.assertEquals(datosExcel.get(i).get("Nombre Producto"), GoogleChromeDriver.driver.findElement(dekosasPage.getTxtElementoBusqueda()).getText());
+        }
+    }
+
+    public void cerrarNavegador(){
+        GoogleChromeDriver.driver.quit();
+    }
+```
+
+### Definición de los pasos (Steps Definitions)
+
+```
+public class DekosaStepsDefinitions {
+
+    DekosasSteps dekosasSteps = new DekosasSteps();
+
+    @Given("^me encuentro en la pagina web Dekosas$")
+    public void meEncuentroEnLaPaginaWebDekosas() {
+        dekosasSteps.abrirPagina();
+
+    }
+    @When("^busque los productos$")
+    public void busqueLosProductos() {
+        dekosasSteps.leerProductosDekosasExcel();
+    }
+
+    @Then("^puedo ver los productos en pantalla$")
+    public void puedoVerLosProductosEnPantalla() {
+        dekosasSteps.validarElementoEnPantalla();
+        dekosasSteps.cerrarNavegador();
+    }
+}
+```
+
+### Caracteriscticas de la automatización (feature)
+
+```
+Feature: HU-001 Buscador Dekosas
+  Yo como usuario en la pagina web Dekosas
+  Quiero buscar los productos en la plataforma
+  Para ver las caracteristicas de los producto
+
+  Scenario: Buscar productos
+    Given me encuentro en la pagina web Dekosas
+    When busque los productos
+    Then puedo ver los productos en pantalla
+
+```
 ## Ejecución
 
 Después de realizar la codificación que se explicó anteriormente se  _ejecutar_ el proyecto en desde la clase **DekosasBuscadorRunner.java**, donde se definió los siguientes parámetros:
