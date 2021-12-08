@@ -36,7 +36,7 @@ En esta sesión se explicará detalladamente la codificación que se implementó
 
 Para que el correcto funcionamiento de algunas utilidades en el proyecto se debe agregar las dependencias en el archivo **build.gradle** que se muestran a continuación 
 
-```
+```java
 apply plugin: 'java-library'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'eclipse'
@@ -77,7 +77,7 @@ gradle.startParameter.continueOnFailure = true
 ```
 ### Archivo Excel
 
-```
+```java
 public class Excel {
 
     public static <rutaDeExcel, hojaExcel> ArrayList<Map<String, String>> leerDatosDeHojaDeExcel( String rutaDeExcel, String hojaDeExcel) throws IOException {
@@ -116,7 +116,8 @@ public class Excel {
 }
 ```
 ### Características ChromeDriver
-```
+
+```java
 public class GoogleChromeDriver {
 
     public static WebDriver driver;
@@ -134,16 +135,15 @@ public class GoogleChromeDriver {
 ```
 ### Elementos y pasos en la página Dekosas
 
-```
+```java
 By txtBuscador = By.xpath("//input[@id='search' and @name='q']");
 By btnBuscador = By.xpath("//button[@class='amsearch-loupe' and @title='Buscar']");
 
 ```
-```
+```java
 public void setBtnElementoBusqueda(String producto) {
         this.btnElementoBusqueda = By.xpath("//a[contains(text(),'"+producto+"')]");
     }
-**
 
     public void setTxtElementoBusqueda(String producto) {
         this.txtElementoBusqueda = By.xpath("//span[contains(text(),'"+producto+"')]");
@@ -151,14 +151,15 @@ public void setBtnElementoBusqueda(String producto) {
 
 ```
 **DekosasSteps**
-```
+
+```java
 DekosasPage dekosasPage = new DekosasPage();
 Excel excelarchivo= new Excel();
 ArrayList<Map<String, String>> datosExcel;
 
 ```
 
-```
+```java
 public void abrirPagina(){
         GoogleChromeDriver.chomeWebDriver("https://dekosas.com/co/");
     }
@@ -190,7 +191,7 @@ public void abrirPagina(){
 
 ### Definición de los pasos (Steps Definitions)
 
-```
+```java
 public class DekosaStepsDefinitions {
 
     DekosasSteps dekosasSteps = new DekosasSteps();
@@ -215,7 +216,7 @@ public class DekosaStepsDefinitions {
 
 ### Caracteriscticas de la automatización (feature)
 
-```
+```java
 Feature: HU-001 Buscador Dekosas
   Yo como usuario en la pagina web Dekosas
   Quiero buscar los productos en la plataforma
@@ -239,7 +240,7 @@ Después de realizar la codificación que se explicó anteriormente se  _ejecuta
 	* glue: Es muy parecido a la opción anterior, pero la diferencia es que ayuda a Cucumber a localizar el archivo con la **definición de pasos**. Para este proyecto es la clase **stepsDefinitions**.
 	* snippets: Es el formato de los fragmentos del código que genera Cucumber, para este caso se elige le tipo CAMELCASE.
 
-```
+``` java
 @RunWith(CucumberWithSerenity.class)
 @CucumberOptions(
         features = "src\\test\\resources\\features\\DekosasBuscador.feature",
