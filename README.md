@@ -36,7 +36,7 @@ En esta sesión se explicará detalladamente la codificación que se implementó
 
 Para que el correcto funcionamiento de algunas utilidades en el proyecto se debe agregar las dependencias en el archivo **build.gradle** que se muestran a continuación 
 
-```java
+```gradle
 apply plugin: 'java-library'
 apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'eclipse'
@@ -216,7 +216,7 @@ public class DekosaStepsDefinitions {
 
 ### Caracteriscticas de la automatización (feature)
 
-```java
+```feature
 Feature: HU-001 Buscador Dekosas
   Yo como usuario en la pagina web Dekosas
   Quiero buscar los productos en la plataforma
