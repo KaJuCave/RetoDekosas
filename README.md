@@ -4,7 +4,7 @@ En este proyecto se desarrollo la automatización en la búsqueda de cinco (5) p
 ## Estructura del proyecto
 _En esta sección encontrara los pasos básicos para el desarrollo del proyecto_
 
-* Explorar la pagina [Dekosas.com](https://dekosas.com/co/) y seleccionar los productos utilizados en la automatización. Se crea un archivo en Excel con el nombre y precio de los productos
+* Explorar la pagina [Dekosas.com](https://dekosas.com/co/) y seleccionar los productos utilizados en la automatización. Se crea un archivo en Excel  con el nombre de ``` retoDekosas.xlsx``` que contiene el nombre y precio de los productos.
 
 ![productosExcel](https://github.com/KaJuCave/imagenesDekosas/blob/master/productosExcel.PNG)
 
@@ -34,7 +34,7 @@ En esta sesión se explicará detalladamente la codificación que se implementó
 
 ### Agregar dependencias
 
-Para que el correcto funcionamiento de algunas utilidades en el proyecto se debe agregar las dependencias en el archivo **build.gradle** que se muestran a continuación 
+Para que el correcto funcionamiento de algunas utilidades en el proyecto se debe agregar las dependencias en el archivo ```build.gradle``` que se muestran a continuación 
 
 ```gradle
 apply plugin: 'java-library'
@@ -77,6 +77,10 @@ gradle.startParameter.continueOnFailure = true
 ```
 ### Archivo Excel
 
+Para este proyecto se necesita leer los nombres de cada uno de los productos elegidos en la página por medio de un archivo Excel, por tal razón se implementó la clase ```Excel.java``` y el siguiente método ```leerDatosDeHojaDeExcel ``` el cual recibe como parámetro dos datos: ```String rutaDeExcel``` se especifica la ruta del archivo Excel con extension .xlsx (el cual se agregó en pasos anteriores) y  el segundo ```String hojaDeExcel``` se refiere al nombre de la hoja del archivo Excel donde se guardaron los nombres de los productos.
+Al finalizar los procesos de este método nos retorna una lista con los datos encontrados y solicitados del archivo Excel. 
+
+
 ```java
 public class Excel {
 
@@ -117,6 +121,15 @@ public class Excel {
 ```
 ### Características ChromeDriver
 
+Para este proyecto se utilizará el navegador **Google Chrome**, por esto creamos unos drivers que nos permitirán utilizar este navegador. Para realizar se creó la clase ```GoogleChromeDriver.java``` y se instanció un objeto de la interfaz **WebDriver** 
+
+``` java
+public static WebDriver driver;
+```
+
+Seguidamente se crea un método donde se especifican las opciones que tendrá el navegador como al iniciar la automatización la ventana este maximizada y por ultimo se implementa el método ```driver.get(url) ```  el cual nos permite navegar a la URL pasada como argumento y espera hasta que se cargue la página.
+
+
 ```java
 public class GoogleChromeDriver {
 
@@ -135,11 +148,21 @@ public class GoogleChromeDriver {
 ```
 ### Elementos y pasos en la página Dekosas
 
+Como la página que utilizamos para la automatización es [Dekosas.com](https://dekosas.com/co/) creamos una clase ```DekosasPage.java ``` en la cual creamos como atributos de la clase **By** los botones y los textos de los elementos a buscar en la página.
+
+```java
+By txtBuscador 
+By btnBuscador 
+By btnElementoBusqueda
+By txtElementoBusqueda
+```
+De estos atributos inicializamos a ```txtBuscador ``` ``` btnBuscador``` con los respectivos **Xpath** que nos permitirán encontrar la barra de búsqueda y escribir el producto en la página.
+
 ```java
 By txtBuscador = By.xpath("//input[@id='search' and @name='q']");
 By btnBuscador = By.xpath("//button[@class='amsearch-loupe' and @title='Buscar']");
-
 ```
+Por último, se crean los ``` Getter ``` de todos los atributos, pero en los ``` Setter ``` solo los de ``` btnElementoBusqueda ``` y ``` txtElementoBusqueda``` se inicalizan como se muestra a continuación 
 ```java
 public void setBtnElementoBusqueda(String producto) {
         this.btnElementoBusqueda = By.xpath("//a[contains(text(),'"+producto+"')]");
@@ -152,12 +175,15 @@ public void setBtnElementoBusqueda(String producto) {
 ```
 **DekosasSteps**
 
+Dentro de la clase ``` DekosasSteps.java``` especificaremos los pasos que la página realizara en la automatización. Para comenzar debemos instanciar objetos de las clases ``` DekosasPage```, ``` Excel``` y ``` ArrayList``` que contiene los datos del Excel. 
+
 ```java
 DekosasPage dekosasPage = new DekosasPage();
 Excel excelarchivo= new Excel();
 ArrayList<Map<String, String>> datosExcel;
 
 ```
+En los siguientes métodos se especifican los pasos que realizara el navegador en la automatización
 
 ```java
 public void abrirPagina(){
@@ -188,13 +214,39 @@ public void abrirPagina(){
         GoogleChromeDriver.driver.quit();
     }
 ```
+### Caracteriscticas de la automatización (feature)
 
+Se crea un archivo con nombre ``` DekosasBuscador``` y con extensión ```.feature``` donde se describen las siguientes características de la prueba. 
+
+``` Feature: ```  nombre de la funcionalidad de la prueba. Con el caso de usuario que se va a probar 
+``` Scenario: ``` se realiza para especificar la funcionalidad la búsqueda de productos 
+``` Given: ```  se describe el contexto, las precondiciones.
+``` When: ```  se especifican las acciones que se van a ejecutar.
+``` Then: ```  y acá se especifica el resultado esperado, las validaciones a realizar.
+
+```feature
+Feature: HU-001 Buscador Dekosas
+  Yo como usuario en la pagina web Dekosas
+  Quiero buscar los productos en la plataforma
+  Para ver las caracteristicas de los producto
+
+  Scenario: Buscar productos
+    Given me encuentro en la pagina web Dekosas
+    When busque los productos
+    Then puedo ver los productos en pantalla
+
+```
 ### Definición de los pasos (Steps Definitions)
 
-```java
-public class DekosaStepsDefinitions {
+Después de ejecutar por primera vez se crean los métodos ``` Given ``` ,``` When ```, ``` Then```  del proyecto. Estos métodos los implementamos en la clase ``` DekosaStepsDefinitions.java``` seguidamente se instancia un objeto de la clase ``` DekosasSteps ``` 
 
-    DekosasSteps dekosasSteps = new DekosasSteps();
+``` java
+DekosasSteps dekosasSteps = new DekosasSteps();
+```
+
+Lo que faltaría en los métodos anteriores llamar los métodos que contiene los pasos para la automatización como abrir el navegador, leer los productos que están guardados en el archivo de Excel, validar los productos encontrados en pantalla y por último cerrar el navegador cuando la automatización finalice de forma exitosa.
+
+```java
 
     @Given("^me encuentro en la pagina web Dekosas$")
     public void meEncuentroEnLaPaginaWebDekosas() {
@@ -211,23 +263,8 @@ public class DekosaStepsDefinitions {
         dekosasSteps.validarElementoEnPantalla();
         dekosasSteps.cerrarNavegador();
     }
-}
 ```
 
-### Caracteriscticas de la automatización (feature)
-
-```feature
-Feature: HU-001 Buscador Dekosas
-  Yo como usuario en la pagina web Dekosas
-  Quiero buscar los productos en la plataforma
-  Para ver las caracteristicas de los producto
-
-  Scenario: Buscar productos
-    Given me encuentro en la pagina web Dekosas
-    When busque los productos
-    Then puedo ver los productos en pantalla
-
-```
 ## Ejecución
 
 Después de realizar la codificación que se explicó anteriormente se  _ejecutar_ el proyecto en desde la clase **DekosasBuscadorRunner.java**, donde se definió los siguientes parámetros:
