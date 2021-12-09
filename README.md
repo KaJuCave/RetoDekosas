@@ -1,7 +1,7 @@
 # Automatización busqueda de productos en la pagina Web Dekosas
 En este proyecto se desarrollo la automatización en la búsqueda de cinco (5) productos para la página [Dekosas.com](https://dekosas.com/co/), utilizando las herramientas de pruebas Selenium y Cucumber.
 
-## Estructura del proyecto
+## Estructura del proyecto 📂
 _En esta sección encontrara los pasos básicos para el desarrollo del proyecto_
 
 * Explorar la pagina [Dekosas.com](https://dekosas.com/co/) y seleccionar los productos utilizados en la automatización. Se crea un archivo en Excel  con el nombre de ``` retoDekosas.xlsx``` que contiene el nombre y precio de los productos.
@@ -28,7 +28,7 @@ _Nota: En las siguientes secciones se explicarán con más detalle la codificaci
 
 ![driverExcel](https://github.com/KaJuCave/imagenesDekosas/blob/master/driversExcel.PNG)
 
-## Codificación del proyecto
+## Codificación del proyecto 📂💻
 
 En esta sesión se explicará detalladamente la codificación que se implementó para automatización de los productos de la página Dekosas.
 
@@ -265,7 +265,7 @@ Lo que faltaría en los métodos anteriores llamar los métodos que contiene los
     }
 ```
 
-## Ejecución
+## Ejecución 💻
 
 Después de realizar la codificación que se explicó anteriormente se  _ejecutar_ el proyecto en desde la clase **DekosasBuscadorRunner.java**, donde se definió los siguientes parámetros:
 
@@ -297,7 +297,7 @@ _En este proyecto se utilizaron las siguientes herramientas_
 * [Cucumber](https://cucumber.io/) - Software que aplica el desarrollo impulsado por el comportamiento
 * [Selenium](https://www.selenium.dev/) - Entorno de pruebas de software para aplicaciones basadas en la web
 
-# Demo
+# Demo 📽️
 Para ver la demostracion de la ejecución del proyecto puede consultar en el video [automatizacion Dekosas](https://youtu.be/zirpW6UrqR8)
 
 ---
